@@ -21,10 +21,17 @@ const Caption = styled.caption`
 `;
 
 const Button = styled.button`
-  padding: 0 10px;
+  padding: 0 12px;
   margin: 0 5px;
   &[aria-current] {
     background-color: red;
+  }
+`;
+
+const TestDiv = styled.div`
+  display: inline-block;
+  &.hidden {
+    display: none;
   }
 `;
 
@@ -44,7 +51,7 @@ function Home3({}) {
   const [currentPage, setCurrentPage] = useState(1);
 
   // 현재 보여지는 아이템의 수
-  const [perPageItems, setPerPageItems] = useState(35);
+  const [perPageItems, setPerPageItems] = useState(50);
 
   // 한 페이지의 마지막 아이템 인덱스
   const indexOfLastPerPageItem = currentPage * perPageItems;
@@ -53,7 +60,7 @@ function Home3({}) {
   const indexOfFirstPerPageItem = indexOfLastPerPageItem - perPageItems;
 
   // 버튼의 총 갯수
-  const totalButtonNumber = Math.ceil(coins.length / perPageItems);
+  const totalBtnNum = Math.ceil(coins.length / perPageItems);
 
   // 버튼이 한 사이클당 몇개 보여질 건지(실질적으로 계산하기위한 설정)
   const [btnLimit, setButtonLimit] = useState(5);
@@ -66,7 +73,7 @@ function Home3({}) {
 
   const createHTMLBtns = () => {
     const result = [];
-    for (let i = 1; i <= totalButtonNumber; i++) {
+    for (let i = 1; i <= totalBtnNum; i++) {
       if (i < maxNumberOfBtnLimit + 1 && i > minNumberOfBtnLimit) {
         result.push(
           <Button
@@ -86,8 +93,7 @@ function Home3({}) {
     setCurrentPage(currentPage - 1);
     if (
       currentPage - 1 === minNumberOfBtnLimit &&
-      minNumberOfBtnLimit ===
-        Math.floor(totalButtonNumber / btnLimit) * btnLimit
+      minNumberOfBtnLimit === Math.floor(totalBtnNum / btnLimit) * btnLimit
     ) {
       setMaxNumberOfBtnLimit(currentPage - 1);
       setMinNumberOfBtnLimit(currentPage - 1 - btnLimit);
@@ -116,8 +122,9 @@ function Home3({}) {
           <Button onClick={onHandlePrevBtn} disabled={currentPage === 1}>
             Prev
           </Button>
+
           {currentPage > btnLimit && (
-            <>
+            <TestDiv>
               <Button
                 onClick={() => {
                   setCurrentPage(1);
@@ -128,29 +135,90 @@ function Home3({}) {
                 1
               </Button>
               &hellip;
-            </>
+            </TestDiv>
           )}
+
           {createHTMLBtns()}
-          {currentPage <=
-            Math.floor(totalButtonNumber / btnLimit) * btnLimit && (
+
+          {totalBtnNum * perPageItems === coins.length ? (
+            <TestDiv
+              className={
+                maxNumberOfBtnLimit === totalBtnNum &&
+                minNumberOfBtnLimit === totalBtnNum - btnLimit
+                  ? "hidden"
+                  : null
+              }
+            >
+              &hellip;
+              <Button
+                onClick={() => {
+                  setCurrentPage(totalBtnNum);
+                  setMaxNumberOfBtnLimit(totalBtnNum);
+                  setMinNumberOfBtnLimit(totalBtnNum - btnLimit);
+                }}
+              >
+                {totalBtnNum}
+              </Button>
+            </TestDiv>
+          ) : (
+            <TestDiv
+              className={
+                minNumberOfBtnLimit ===
+                Math.floor(totalBtnNum / btnLimit) * btnLimit
+                  ? "hidden"
+                  : null
+              }
+            >
+              &hellip;
+              <Button
+                onClick={() => {
+                  setCurrentPage(totalBtnNum);
+                  setMaxNumberOfBtnLimit(totalBtnNum);
+                  setMinNumberOfBtnLimit(
+                    Math.floor(totalBtnNum / btnLimit) * btnLimit,
+                  );
+                }}
+              >
+                {totalBtnNum}
+              </Button>
+            </TestDiv>
+          )}
+
+          {/* {currentPage <= Math.floor(totalBtnNum / btnLimit) * btnLimit && (
             <>
               &hellip;
               <Button
                 onClick={() => {
-                  setCurrentPage(totalButtonNumber);
-                  setMaxNumberOfBtnLimit(totalButtonNumber);
+                  setCurrentPage(totalBtnNum);
+                  setMaxNumberOfBtnLimit(totalBtnNum);
                   setMinNumberOfBtnLimit(
-                    Math.floor(totalButtonNumber / btnLimit) * btnLimit,
+                    Math.floor(totalBtnNum / btnLimit) * btnLimit,
                   );
                 }}
               >
-                {totalButtonNumber}
+                {totalBtnNum}안맞
               </Button>
             </>
           )}
+
+          {currentPage <= totalBtnNum - btnLimit && (
+            <>
+              &hellip;
+              <Button
+                onClick={() => {
+                  setCurrentPage(totalBtnNum);
+                  setMaxNumberOfBtnLimit(totalBtnNum);
+                  setMinNumberOfBtnLimit(totalBtnNum - btnLimit);
+                }}
+              >
+                {totalBtnNum}맞
+              </Button>
+            </>
+          )} */}
+
           <Button
             onClick={onHandleNextBtn}
-            disabled={currentPage === totalButtonNumber}
+            disabled={currentPage === totalBtnNum}
           >
             Next
           </Button>
