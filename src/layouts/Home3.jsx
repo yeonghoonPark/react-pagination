@@ -21,6 +21,8 @@ const Caption = styled.caption`
 `;
 
 const Button = styled.button`
+  padding: 0 10px;
+  margin: 0 5px;
   &[aria-current] {
     background-color: red;
   }
@@ -42,7 +44,7 @@ function Home3({}) {
   const [currentPage, setCurrentPage] = useState(1);
 
   // 현재 보여지는 아이템의 수
-  const [perPageItems, setPerPageItems] = useState(10);
+  const [perPageItems, setPerPageItems] = useState(35);
 
   // 한 페이지의 마지막 아이템 인덱스
   const indexOfLastPerPageItem = currentPage * perPageItems;
@@ -54,7 +56,7 @@ function Home3({}) {
   const totalButtonNumber = Math.ceil(coins.length / perPageItems);
 
   // 버튼이 한 사이클당 몇개 보여질 건지(실질적으로 계산하기위한 설정)
-  const [buttonLimit, setButtonLimit] = useState(5);
+  const [btnLimit, setButtonLimit] = useState(5);
 
   // 버튼의 한 사이클에서 가장 높은 수
   const [maxNumberOfBtnLimit, setMaxNumberOfBtnLimit] = useState(5);
@@ -82,17 +84,25 @@ function Home3({}) {
 
   const onHandlePrevBtn = () => {
     setCurrentPage(currentPage - 1);
-    if ((currentPage - 1) % buttonLimit === 0) {
-      setMaxNumberOfBtnLimit(maxNumberOfBtnLimit - buttonLimit);
-      setMinNumberOfBtnLimit(minNumberOfBtnLimit - buttonLimit);
+    if (
+      currentPage - 1 === minNumberOfBtnLimit &&
+      minNumberOfBtnLimit ===
+        Math.floor(totalButtonNumber / btnLimit) * btnLimit
+    ) {
+      setMaxNumberOfBtnLimit(currentPage - 1);
+      setMinNumberOfBtnLimit(currentPage - 1 - btnLimit);
+      console.log("여기가 스팟이다");
+    } else if ((currentPage - 1) % btnLimit === 0) {
+      setMaxNumberOfBtnLimit(maxNumberOfBtnLimit - btnLimit);
+      setMinNumberOfBtnLimit(minNumberOfBtnLimit - btnLimit);
     }
   };
 
   const onHandleNextBtn = () => {
     setCurrentPage(currentPage + 1);
     if (currentPage + 1 > maxNumberOfBtnLimit) {
-      setMaxNumberOfBtnLimit(maxNumberOfBtnLimit + buttonLimit);
-      setMinNumberOfBtnLimit(minNumberOfBtnLimit + buttonLimit);
+      setMaxNumberOfBtnLimit(maxNumberOfBtnLimit + btnLimit);
+      setMinNumberOfBtnLimit(minNumberOfBtnLimit + btnLimit);
     }
   };
 
@@ -106,12 +116,12 @@ function Home3({}) {
           <Button onClick={onHandlePrevBtn} disabled={currentPage === 1}>
             Prev
           </Button>
-          {currentPage > buttonLimit && (
+          {currentPage > btnLimit && (
             <>
               <Button
                 onClick={() => {
                   setCurrentPage(1);
-                  setMaxNumberOfBtnLimit(5);
+                  setMaxNumberOfBtnLimit(btnLimit);
                   setMinNumberOfBtnLimit(0);
                 }}
               >
@@ -121,14 +131,17 @@ function Home3({}) {
             </>
           )}
           {createHTMLBtns()}
-          {currentPage <= totalButtonNumber - buttonLimit && (
+          {currentPage <=
+            Math.floor(totalButtonNumber / btnLimit) * btnLimit && (
             <>
               &hellip;
               <Button
                 onClick={() => {
                   setCurrentPage(totalButtonNumber);
                   setMaxNumberOfBtnLimit(totalButtonNumber);
-                  setMinNumberOfBtnLimit(totalButtonNumber - buttonLimit);
+                  setMinNumberOfBtnLimit(
+                    Math.floor(totalButtonNumber / btnLimit) * btnLimit,
+                  );
                 }}
               >
                 {totalButtonNumber}
