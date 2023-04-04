@@ -1,86 +1,151 @@
 import styled from "styled-components";
 import axios from "axios";
-import { useState } from "react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import AppPagination from "../components/AppPagination";
 
-// pagination algorithm
+const Container = styled.div`
+  margin: 0 auto;
+  padding: 2rem;
+`;
 
-// 1. 게시물을 나눠서 표시할 때 총 몇개의 페이지가 필요한가?
-// - 총 게시물수를 페이지당 표시 할 게시물 수로 나눈 후 올림한다.
-// ex, 총 37개의 게시물이 있고 페이지당 표시 할 게시물이 10이라면 37/10 = 3.7, 3.7올림 = 4
+const LoadingTag = styled.div`
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+`;
 
-// 2. 현재 페이지 번호를 기준으로 표시해줘야 할 게시물들의 범위(offset), 즉 해당 페이지의 첫 게시물의 index를 구해야한다.
-// - 페이지 번호에서 1을 뺀 후 페이지당 표시 할 게시물의 수를 곱하면 페이지당 첫 게시물의 index를 구할 수 있다.
-// ex, 총 37개의 게시물이 있고 페이지당 표시 할 게시물이 10이라면
-// (1 - 1) * 10 = 0
-// (2 - 1) * 10 = 10
-// (3 - 1) * 10 = 20
+const Table = styled.table`
+  table-layout: fixed;
+  width: 100%;
+  border-collapse: collapse;
+  border: 3px solid purple;
+  background-color: #ff33cc;
 
-const Button = styled.button`
-  &[aria-current] {
-    background: red;
+  & caption {
+    padding: 20px;
+    font-style: italic;
+    font-size: 1rem;
+    caption-side: bottom;
+    color: #666;
+    text-align: right;
+    letter-spacing: 18px;
+  }
+
+  & thead {
+    color: white;
+    text-shadow: 1px 1px 1px black;
+    th {
+      padding: 12px;
+      background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.1),
+        rgba(0, 0, 0, 0.5)
+      );
+      border: 3px solid purple;
+      font-family: "Permanent Marker", cursive;
+      font-style: italic;
+      font-size: 1.2rem;
+    }
+    th:nth-child(1) {
+      width: 10%;
+    }
+    th:nth-child(2) {
+      width: 15%;
+    }
+    th:nth-child(3) {
+      width: 30%;
+    }
+    th:nth-child(4) {
+      width: 35%;
+    }
+  }
+
+  & tbody {
+    tr:nth-child(odd) {
+      background-color: #ff33cc;
+    }
+    tr:nth-child(even) {
+      background-color: #e495e4;
+    }
+    td {
+      padding: 18px;
+      text-align: center;
+      font-family: "Josefin Sans", sans-serif;
+    }
   }
 `;
 
-function Home({}) {
-  console.log("[Home]");
+const PaginationConatiner = styled.div`
+  text-align: center;
+`;
 
+function Home3({}) {
+  console.log("[Home3]");
+  const [isLoading, setIsLoading] = useState(false);
   const [coins, setCoins] = useState([]);
 
-  const [pageLimit, setLimit] = useState(30);
-  const [page, setPage] = useState(1);
-  const offset = (page - 1) * pageLimit;
+  const [currentPage, setCurrentPage] = useState(1);
+  const perPageItems = 12;
+  const indexOfLastPerPageItem = currentPage * perPageItems;
+  const indexOfFirstPerPageItem = indexOfLastPerPageItem - perPageItems;
 
   const getCoins = async () => {
-    console.log("[getData]");
-    const url = "https://api.coinpaprika.com/v1/tickers";
-    const res = await axios.get(url);
-    console.log(res.data);
+    const res = await axios.get("https://api.coinpaprika.com/v1/tickers");
     setCoins(res.data);
+    console.log(res.data);
+    setIsLoading(true);
   };
-
   useEffect(() => {
     getCoins();
   }, []);
 
   return (
-    <>
-      <h1>Home1</h1>
-      <AppPagination
-        pageLimit={pageLimit}
-        page={page}
-        totalLenght={coins.length}
-        setPage={setPage}
-        buttonLimit={10}
-      />
-      <table border={"1"}>
-        <caption>Coins</caption>
-        <thead>
-          <tr>
-            <th>Rank</th>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Symbol</th>
-            <th>Beta Value</th>
-          </tr>
-        </thead>
-        <tbody>
-          {coins.slice(offset, offset + pageLimit).map((cV) => {
-            return (
-              <tr key={cV?.id}>
-                <td>{cV?.rank}</td>
-                <td>{cV?.id}</td>
-                <td>{cV?.name}</td>
-                <td>{cV?.symbol}</td>
-                <td>{cV?.beta_value}</td>
+    <Container>
+      {!isLoading ? (
+        <LoadingTag>Loading...</LoadingTag>
+      ) : (
+        <>
+          {/* table */}
+          <Table>
+            <caption>Coins</caption>
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Symbol</th>
+                <th>Name</th>
+                <th>ID</th>
               </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </>
+            </thead>
+            <tbody>
+              {coins
+                .slice(indexOfFirstPerPageItem, indexOfLastPerPageItem)
+                .map((cV) => {
+                  return (
+                    <tr key={cV.id}>
+                      <td>{cV.rank}</td>
+                      <td>{cV.symbol}</td>
+                      <td>{cV.name}</td>
+                      <td>{cV.id}</td>
+                    </tr>
+                  );
+                })}
+            </tbody>
+          </Table>
+
+          <PaginationConatiner>
+            {/* pagination */}
+            <AppPagination
+              currentPage={currentPage}
+              totalLength={coins.length}
+              perPageItems={perPageItems}
+              setCurrentPage={setCurrentPage}
+            />
+          </PaginationConatiner>
+        </>
+      )}
+    </Container>
   );
 }
 
-export default Home;
+export default Home3;

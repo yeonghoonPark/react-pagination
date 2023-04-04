@@ -3,8 +3,6 @@ import axios from "axios";
 import { useState } from "react";
 import { useEffect } from "react";
 
-// import AppPagination2 from "../components/AppPagination2";
-
 const Button = styled.button`
   padding: 10px;
   border: 1px solid white;
